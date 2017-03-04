@@ -1,7 +1,5 @@
-# Change Log
-All notable changes to the "ignore-gitignore" extension will be documented in this file.
+# Changelog
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+## 1.0.0
 
-## [Unreleased]
-- Initial release
+- Initial release with one command to copy `.gitignore` to `search.exclude` and `files.exclude`

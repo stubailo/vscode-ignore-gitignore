@@ -11,13 +11,13 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:extension.sayHello"
+    "onCommand:extension.ignoreGitignore"
   ],
   "main": "./out/src/extension",
   "contributes": {
     "commands": [{
-      "command": "extension.sayHello",
-      "title": "Hello World"
+      "command": "extension.ignoreGitignore",
+      "title": "Copy .gitignore to VS Code file exclude configuration"
     }]
   },
   "scripts": {
