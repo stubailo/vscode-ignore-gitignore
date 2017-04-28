@@ -35,9 +35,9 @@ export function activate(context: ExtensionContext) {
 
       // Let's do search for now
       for (let lineIndex = 0; lineIndex < doc.lineCount; lineIndex++) {
-        const lineText = doc.lineAt(lineIndex).text;
+        const lineText: string = doc.lineAt(lineIndex).text;
 
-        if (lineText.length) {
+        if (lineText.length && lineText.charAt(0) !== '#') {
           let lineTextWithPath = lineText;
           if (dir !== '.') {
             lineTextWithPath = dir + '/' + lineText;
