@@ -1,33 +1,26 @@
 'use strict';
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import { workspace, commands, ExtensionContext, window } from 'vscode';
+
 import { dirname } from 'path';
+import { commands, ExtensionContext, window, workspace } from 'vscode';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export function activate(context: ExtensionContext) {
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with  registerCommand
-  // The commandId parameter must match the command field in package.json
   let disposable = commands.registerCommand('extension.ignoreGitignore', async () => {
-    // The code you place here will be executed every time your command is executed
 
-    // Just use the root one for now
-    const gitignores = await workspace.findFiles('**/.gitignore')
+    // Get a list of all .gitignore files in the project
+    const gitignores = await workspace.findFiles('**/.gitignore');
 
-    let path;
-    if (!gitignores.length) {
+    if (!gitignores) {
       window.showInformationMessage('No .gitignore files found in current workspace.');
       return;
     }
 
-    const excludeObj: { [glob: string]: boolean } = {};
     const gitignoreDocumentPromises = gitignores.map((file) => {
       return workspace.openTextDocument(file.path);
     });
 
     const gitignoreDocuments = await Promise.all(gitignoreDocumentPromises);
+
+    const excludeObj: { [glob: string]: boolean } = {};
 
     gitignoreDocuments.forEach((doc) => {
       const relativePath = workspace.asRelativePath(doc.fileName);
@@ -35,15 +28,25 @@ export function activate(context: ExtensionContext) {
 
       // Let's do search for now
       for (let lineIndex = 0; lineIndex < doc.lineCount; lineIndex++) {
-        const lineText = doc.lineAt(lineIndex).text;
+        let lineText = doc.lineAt(lineIndex).text;
 
-        if (lineText.length) {
-          let lineTextWithPath = lineText;
-          if (dir !== '.') {
-            lineTextWithPath = dir + '/' + lineText;
+        if (lineText.length && !lineText.startsWith('#')) {
+          const negated = lineText.startsWith('!');
+          if (negated) {
+            lineText = lineText.substr(1);
           }
 
-          excludeObj[lineTextWithPath] = true;
+          // pattern starts at project root
+          let glob = lineText.startsWith('/')
+            ? lineText.substr(1)
+            : `**/${lineText}`;
+
+          // prefix the glob if the .gitignore was not found in the project root
+          if (dir !== '.') {
+            glob = `${dir}/${glob}`;
+          }
+
+          excludeObj[glob] = !negated;
         }
       }
     })
@@ -54,12 +57,11 @@ export function activate(context: ExtensionContext) {
 
     window.showInformationMessage(
       `Successfully overwrote search.exclude and files.exclude from \
-${gitignoreDocuments.length} .gitignore files.`);
+  ${gitignoreDocuments.length} .gitignore files.`);
   });
 
   context.subscriptions.push(disposable);
 }
 
-// this method is called when your extension is deactivated
 export function deactivate() {
 }
