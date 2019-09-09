@@ -39,11 +39,18 @@ export function activate(context: ExtensionContext) {
 
         if (lineText.length) {
           let lineTextWithPath = lineText;
+          let ignore = true;
+          
           if (dir !== '.') {
             lineTextWithPath = dir + '/' + lineText;
           }
-
-          excludeObj[lineTextWithPath] = true;
+          
+          if (lineTextWithPath.charAt(0) === '!') {
+            ignore = false;
+            lineTextWithPath = lineTextWithPath.substring(1);
+          }
+          
+          excludeObj[lineTextWithPath] = ignore;
         }
       }
     })
